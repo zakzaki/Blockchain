@@ -65,9 +65,40 @@ public class Block implements Serializable , Sendable{
         this.previousHash = previousHash;
     }
 
+    
 
     
-    public void addTransaction(Transaction transation)
+    public String getRoot() {
+		return root;
+	}
+
+
+	public void setRoot(String root) {
+		this.root = root;
+	}
+
+
+	public PublicKey getCreatorIdentity() {
+		return creatorIdentity;
+	}
+
+
+	public void setCreatorIdentity(PublicKey creatorIdentity) {
+		this.creatorIdentity = creatorIdentity;
+	}
+
+
+	public String getCreatorSignature() {
+		return creatorSignature;
+	}
+
+
+	public void setCreatorSignature(String creatorSignature) {
+		this.creatorSignature = creatorSignature;
+	}
+
+
+	public void addTransaction(Transaction transation)
     {
         transactions.add(transation);
     }

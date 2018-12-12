@@ -133,6 +133,81 @@ public class arbre_merkel {
 		
 	}
 	
+	
+	/*****************************************/
+	
+static String arbre2(ArrayList<String> donne2) {
+		
+		ArrayList<String> res_final=new ArrayList<>();
+		String r="";
+
+		if(donne2.size()==0) return null;	
+		
+		ArrayList<String> donne=new ArrayList<>();
+		for(int i=0;i<donne2.size();i++) {
+			try {
+				donne.add(hmac(donne2.get(i),"0" ));
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		
+		if(donne.size()==1) return donne.get(0);
+		
+		
+		if(donne.size()%2!=0) {
+			r=donne.get(donne.size()-1);
+			donne.remove(donne.size()-1);
+		}
+		
+			
+			
+			res_final.addAll(donne);
+			
+			
+			while(res_final.size()!=1) {					
+			
+				
+			ArrayList<String> res=new ArrayList<>();
+			
+			
+			int i=0;
+			while(i+1<res_final.size()) {
+				
+				try {
+					res.add(hmac(res_final.get(i) + res_final.get(i+1),"1" ));
+					
+					i=i+2;
+				} catch (NoSuchAlgorithmException e) {				
+					e.printStackTrace();
+				}
+				
+			}
+			if(i==res_final.size()-1) res.add(res_final.get(i));
+			
+			res_final.clear();
+			res_final.addAll(res);
+			
+			}
+			
+			
+			if(r!="")
+				try {
+					r=hmac( res_final.get(0) + r ,"1");
+					return r;
+					
+				} catch (NoSuchAlgorithmException e) {
+					e.printStackTrace();
+				}
+	
+		
+		return res_final.get(0);
+		
+	}
+	
+	/****************************************/
+	
 	static boolean check(String root, ArrayList<Transaction>donne) {
 		
 			String r=arbre(donne);
