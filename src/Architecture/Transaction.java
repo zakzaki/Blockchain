@@ -2,47 +2,28 @@ package Architecture;
 import java.io.Serializable;
 import java.security.PublicKey;
 import java.util.Date;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Transaction implements Serializable, Sendable{
 
-	 private String senderIdentity;
-	 private PublicKey  senderAddress;
 	 private String senderSignature;
-	 private long timestamp;
-	 private String type; //creation, annulation, inscription
-	 //private String id_type; //id de la creation/annulation/inscription de la transaction
-	 private String json;
+	 private String souscriptionHash;
+	 private Serialiser serialiser;
+	  
 	 
-	 public Transaction(PublicKey senderAddress ) {
-	        this.senderAddress = senderAddress;
-	        this.timestamp = new Date().getTime();
-	    }
-	 
-	 public Transaction(PublicKey senderAddress, String type ) {
-	        this.senderAddress = senderAddress;
-	        this.timestamp = new Date().getTime();
-	        this.type=type;
-	      //  this.id_type=id_type;
-	        
-	        GsonBuilder builder = new GsonBuilder();	     
-	        Gson gson = builder.create();
-	        
-	        String[] tab= {type,Long.toString(timestamp)};
-	        json=gson.toJson(tab);
-	        
-	    }
-	 
-	 public String getSenderIdentity() {
-	        return senderIdentity;
-	    }
+	    public Transaction(String senderSignature, String souscriptionHash, Serialiser serialiser) {
+		
+	    	super();
+		this.senderSignature = senderSignature;
+		this.souscriptionHash = souscriptionHash;
+		this.serialiser = serialiser;
+	}
+	    
+	    
 
-	    public void setSenderIdentity(String senderIdentity) {
-	        this.senderIdentity = senderIdentity;
-	    }
-
-	    public String getSenderSignature() {
+		public String getSenderSignature() {
 	        return senderSignature;
 	    }
 
@@ -50,24 +31,38 @@ public class Transaction implements Serializable, Sendable{
 	        this.senderSignature = senderSignature;
 	    }
 
-	    public PublicKey getSenderAddress() {
-	        return senderAddress;
-	    }
-
-	    public void setSenderAddress(PublicKey senderAddress) {
-	        this.senderAddress = senderAddress;
-	    }
-
-
-	    public long getTimestamp() {
-	        return timestamp;
-	    }
-
-	    public void setTimestamp(long timestamp) {
-	        this.timestamp = timestamp;
-	    }
+	    
+	    public String transform() throws JsonProcessingException {
+			    	
+	    	ObjectMapper mapper = new ObjectMapper();
+			String json1 = mapper.writeValueAsString(serialiser);
+			return json1;
+	    	
+		}
 
 
-	 
+		 @Override
+		    public String toString() {
 
+		        String res = null;
+		        if(serialiser.getType_transaction().equals("CREATION")){
+
+		            res =   "Transaction{\n" +
+		                    "   pub_key='" + serialiser.getPub_key() + "\',\n" +
+		                    "   type_transaction='creation'\n" +
+		                    "   "+ serialiser.getPayload().toString()+
+		                    "\n}";
+
+		        }else if (serialiser.getType_transaction().equals("REGISTER")){
+		            res =   "Transaction{" +
+		                    "   pub_key='" + serialiser.getPub_key() + "\',\n" +
+		                    "   type_transaction='register'\n" +
+		                    "   payload{\n" +
+		                    "       event_hash='" + souscriptionHash + '\'' + "\n"+
+		                    "       }\n"+
+		                    "\n}";
+		        }
+		        return  res;
+		    }
+ 
 }
