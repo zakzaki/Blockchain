@@ -1,6 +1,8 @@
 package Architecture;
 
-public class Limits {
+import java.io.Serializable;
+
+public class Limits implements Serializable, Sendable{
 
 	private String min,max;
 

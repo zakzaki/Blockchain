@@ -1,6 +1,8 @@
 package Architecture;
 
-public class Date_p {
+import java.io.Serializable;
+
+public class Date_p implements Serializable, Sendable{
 
 	private String begin, end, end_souscription;
 	

@@ -7,6 +7,7 @@ import p2p.Wallet;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -101,6 +102,13 @@ public class CommunicationNodeManager {
                 while (listening) {
                     try {
                         Socket s = serverSocket.accept();
+
+                        String str = s.getInetAddress().toString();
+                        String strNew = str.replace("/", "");
+                        System.out.println("adress "+s.getLocalSocketAddress() + " remote  "+s.getRemoteSocketAddress());
+                        Node a = new Node(strNew,s.getLocalPort());
+                        this.getNode().addPeer(a);
+
                         final NodeServerThread thread = new NodeServerThread(this, s);
                         thread.start();
                     }catch (SocketException e){
@@ -113,7 +121,8 @@ public class CommunicationNodeManager {
                 e.printStackTrace();
             }
         });
-       // broadcast(REQUEST_BLOCKCHAIN, null);
+
+      broadcast("requestBlockchain", null);
     }
 
     /**
@@ -133,13 +142,27 @@ public class CommunicationNodeManager {
      * @param type
      * @param data
      */
-    public void broadcast(Message.MESSAGE_TYPE type, final Sendable data) {
+   /* public void broadcast(Message.MESSAGE_TYPE type, final Sendable data) {
         List<Node> peers = node.getPeers();
         Iterator it = peers.iterator();
         while (it.hasNext()) {
             try {
                 Node peer = (Node) it.next();
                 sendMessage(type, peer.getAddress(), peer.getPort(), data);
+            }
+            catch (Exception e){
+
+            }
+        }
+    }*/
+
+    public void broadcast(String  b, final Sendable data) {
+        List<Node> peers = node.getPeers();
+        Iterator it = peers.iterator();
+        while (it.hasNext()) {
+            try {
+                Node peer = (Node) it.next();
+                sendMessage(b, peer.getAddress(), peer.getPort(), data);
             }
             catch (Exception e){
 
@@ -164,7 +187,7 @@ public class CommunicationNodeManager {
             while ((fromPeer = in.readObject()) != null) {
                 if (fromPeer instanceof Message) {
                     final Message msg = (Message) fromPeer;
-                    System.out.println(String.format(" Received: %s ", msg.toString())+" "+node);
+                    System.out.println(String.format(" Received: %s", msg.toString())+node);
                     if (Message.MESSAGE_TYPE.READY == msg.type) {
                         Message.MessageBuilder builder = new Message.MessageBuilder()
                                 .withType(type)
@@ -185,8 +208,8 @@ public class CommunicationNodeManager {
         } catch (UnknownHostException e) {
             System.err.println(String.format("Unknown host %s %d", host, port));
         } catch (IOException e) {
-            //System.err.println(String.format("%s couldn't get I/O for the connection to %s. Retrying...%n", node.getPort(), port));
-            try {
+
+              try {
                 Thread.sleep(100);
             } catch (InterruptedException e1) {
                 e1.printStackTrace();
@@ -194,6 +217,46 @@ public class CommunicationNodeManager {
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+
+    public void sendMessage(String message, String host, int port, Sendable data) {
+
+        final Socket peer;
+
+        try {
+            peer = new Socket(host, port);
+
+            OutputStream mmOutStream;
+            mmOutStream = peer.getOutputStream();
+            mmOutStream.write(message.getBytes());
+
+            if (peer.getInputStream().available() > 0) {
+
+                byte[] buffer;
+                buffer = new byte[peer.getInputStream().available()];
+                peer.getInputStream().read(buffer);
+                Node n = new Node(host, port);
+                
+                System.out.println(String.format(" Received: %s", new String(buffer))+n);
+        
+                if(new String(buffer).equals("requestBlockchain")){
+                    mmOutStream.write("this is Blockchain version".getBytes());
+                }
+            }
+
+
+        } catch (IOException e) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e1) {
+                e1.printStackTrace();
+            }
+            e.printStackTrace();
+        }
+
+
+
     }
 
 

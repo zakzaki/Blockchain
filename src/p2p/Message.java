@@ -7,12 +7,8 @@ import Architecture.Block;
 import Architecture.Blockchain;
 import Architecture.Transaction;
 
-import java.util.List;
 
-/**
- * @author RIGHI Sylia & TUDOR Alexandra
- */
-public class Message implements Serializable{
+public class Message implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -20,17 +16,15 @@ public class Message implements Serializable{
     int receiverPort;
     String senderHost;
     String receiverHost;
-    Message.MESSAGE_TYPE type;
+    MESSAGE_TYPE type;
     List<Block> blockOlds;
     Blockchain blockchain;
     Block block;
     Transaction transaction;
 
-    /**
-     * Enum p2p messages communication protocol
-     */
+  
     public enum MESSAGE_TYPE {
-        READY, REQUEST_BLOCKCHAIN, RSPONSE_BLOCKCHAIN,SEND_TRANSACTION, SEND_NEW_BLOCK, SEND_VALIDATOR_NOMINATION;
+        READY, REQUEST_BLOCKCHAIN, RSPONSE_BLOCKCHAIN,SEND_TRANSACTION, SEND_NEW_BLOCK;
     }
 
     /**
@@ -86,7 +80,7 @@ public class Message implements Serializable{
          * @param port
          * @return
          */
-        Message.MessageBuilder withSender(final String host,final int port) {
+        MessageBuilder withSender(final String host, final int port) {
             message.senderHost = host;
             message.senderPort = port;
             return this;
@@ -98,7 +92,7 @@ public class Message implements Serializable{
          * @param port
          * @return
          */
-        Message.MessageBuilder withReceiver(final String host,final int port) {
+        MessageBuilder withReceiver(final String host, final int port) {
             message.receiverHost = host;
             message.receiverPort = port;
             return this;
@@ -109,7 +103,7 @@ public class Message implements Serializable{
          * @param type
          * @return
          */
-        Message.MessageBuilder withType(final Message.MESSAGE_TYPE type) {
+        MessageBuilder withType(final MESSAGE_TYPE type) {
             message.type = type;
             return this;
         }
@@ -119,7 +113,7 @@ public class Message implements Serializable{
          * @param blockOlds
          * @return
          */
-        Message.MessageBuilder withBlocks(final List<Block> blockOlds) {
+        MessageBuilder withBlocks(final List<Block> blockOlds) {
             message.blockOlds = blockOlds;
             return this;
         }
@@ -129,7 +123,7 @@ public class Message implements Serializable{
          * @param blockchain
          * @return
          */
-        Message.MessageBuilder withBlockchain(final Blockchain blockchain){
+        MessageBuilder withBlockchain(final Blockchain blockchain){
             message.blockchain = blockchain;
             return this;
         }
@@ -139,7 +133,7 @@ public class Message implements Serializable{
          * @param block
          * @return
          */
-        Message.MessageBuilder withBlock(final Block block){
+        MessageBuilder withBlock(final Block block){
             message.block = block;
             return this;
         }
@@ -149,7 +143,7 @@ public class Message implements Serializable{
          * @param transaction
          * @return
          */
-        Message.MessageBuilder withTransaction(final Transaction transaction){
+        MessageBuilder withTransaction(final Transaction transaction){
             message.transaction = transaction;
             return this;
         }

@@ -3,9 +3,15 @@ import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.security.SignatureException;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class HashUtil {
 
@@ -70,5 +76,46 @@ public class HashUtil {
  		return result;
  		
  	}
+ 	
+ 	
+ 	 public static String signECDSA(byte[] data, PrivateKey privateKey) throws SignatureException {
+
+         Signature ecdsaSign = null;
+         byte[] signature = null;
+         try {
+             ecdsaSign = Signature.getInstance("SHA256withECDSA", new BouncyCastleProvider());
+             ecdsaSign.initSign(privateKey);
+             ecdsaSign.update(data);
+             signature = ecdsaSign.sign();
+         } catch (NoSuchAlgorithmException e) {
+             e.printStackTrace();
+         } catch (InvalidKeyException e) {
+             e.printStackTrace();
+         }
+
+         return new String(signature);
+
+     }
+ 	 
+ 	public static  boolean verifyECDSASignature(byte[] data, byte[] signature, PublicKey publicKey) throws SignatureException {
+
+        boolean result = false;
+        Signature ecdsaVerify = null;
+        try {
+            ecdsaVerify = Signature.getInstance("SHA256withECDSA", new BouncyCastleProvider());
+            ecdsaVerify.initVerify(publicKey);
+            ecdsaVerify.update(data);
+            result = ecdsaVerify.verify(signature);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (SignatureException e) {
+            e.printStackTrace();
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
 
 }

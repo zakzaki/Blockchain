@@ -39,7 +39,7 @@ public class Blockchain implements Serializable , Sendable {
     public void addBlock(Block b) {
         if (isBlockValid(b)) 
             blockChain.add(b);
-        else System.out.println("Le bloc n'est pas valide, on ne peut pas ajouter un bloc");
+       // else System.out.println("Le bloc n'est pas valide, on ne peut pas ajouter un bloc");
     }
 
     //Retourner la liste de tous les blocs de la Blockchain

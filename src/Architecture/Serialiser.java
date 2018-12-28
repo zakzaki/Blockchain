@@ -1,17 +1,17 @@
 package Architecture;
 
+import java.io.Serializable;
 import java.security.PublicKey;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class Serialiser {
+public class Serialiser implements Serializable, Sendable {
 	
 	 	private String  pub_key;
 		private String type_transaction; //creation, REGISTER
 		private Payload payload;
+		
 	
 	
 	public Serialiser(PublicKey pub_key, String type_transaction, Payload payload) {
@@ -21,6 +21,7 @@ public class Serialiser {
 		this.type_transaction = type_transaction;
 		this.payload = payload;
 	}
+	
 	
 
 	public String getPub_key() {
@@ -45,18 +46,6 @@ public class Serialiser {
 
 	public void setPayload(Payload payload) {
 		this.payload = payload;
-	}
-	
-public void transform() throws JsonProcessingException {
-		
-		
-    	ObjectMapper mapper = new ObjectMapper();
-    	String json1 = mapper.writeValueAsString(this);
-	//	String json2 = mapper.writeValueAsString(this.getPayload());
-		//String json3 = mapper.writeValueAsString(this.getPub_key());
-		System.out.println(json1);
-		//System.out.println(json3);
-	}
-	 
+	}	 
 	
 }

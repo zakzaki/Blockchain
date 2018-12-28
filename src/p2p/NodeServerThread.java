@@ -5,75 +5,83 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
+import Architecture.Transaction;
+
 public class NodeServerThread extends Thread {
 
 
-	    private Socket client;
-	    private final CommunicationNodeManager nodeManager;
+    private Socket client;
+    private final CommunicationNodeManager nodeManager;
 
-	    /*********************************** Constructors *****************************************************************/
+    /*********************************** Constructors *****************************************************************/
 
-	    /**
-	     *
-	     * @param nodeManager
-	     * @param client
-	     */
-	    NodeServerThread(final CommunicationNodeManager nodeManager, final Socket client) {
-	        super(nodeManager.getNode().getName() + System.currentTimeMillis());
-	        this.nodeManager = nodeManager;
-	        this.client = client;
-	    }
+    /**
+     *
+     * @param nodeManager
+     * @param client
+     */
+    NodeServerThread(final CommunicationNodeManager nodeManager, final Socket client) {
+        super(nodeManager.getNode().getName() + System.currentTimeMillis());
+        this.nodeManager = nodeManager;
+        this.client = client;
+    }
 
-	    /********************************Getters and setters **************************************************************/
+    /********************************Getters and setters **************************************************************/
 
-	    /**
-	     *
-	     * @return
-	     */
-	    public Socket getClient() {
-	        return client;
-	    }
+    /**
+     *
+     * @return
+     */
+    public Socket getClient() {
+        return client;
+    }
 
-	    /**
-	     *
-	     * @param client
-	     */
-	    public void setClient(Socket client) {
-	        this.client = client;
-	    }
+    /**
+     *
+     * @param client
+     */
+    public void setClient(Socket client) {
+        this.client = client;
+    }
 
-	    /**
-	     *
-	     * @return
-	     */
-	    public CommunicationNodeManager getNodeManager() {
-	        return nodeManager;
-	    }
+    /**
+     *
+     * @return
+     */
+    public CommunicationNodeManager getNodeManager() {
+        return nodeManager;
+    }
 
-	    /*************************************************** Auther methods ***********************************************/
+    /*************************************************** Auther methods ***********************************************/
 
-	    @Override
-	    public void run() {
 
-	        try (
-	                ObjectOutputStream out = new ObjectOutputStream(client.getOutputStream());
-	                final ObjectInputStream in = new ObjectInputStream(client.getInputStream())) {
-	            Message message = new Message.MessageBuilder().withSender(nodeManager.getNode().getAddress(),nodeManager.getNode().getPort())
-	                    .withReceiver(client.getInetAddress().getHostAddress().toString(),client.getPort()).withType(Message.MESSAGE_TYPE.READY).build();
-	            out.writeObject(message);
-	            Object fromClient;
-	            while ((fromClient = in.readObject()) != null) {
-	                if (fromClient instanceof Message) {
+    @Override
+    public void run() {
 
-	                    System.out.println(String.format(" Received: %s", fromClient.toString())+nodeManager.getNode());
-
-	                }
-	            }
-	            client.close();
-	        } catch (ClassNotFoundException | IOException e) {
-	            e.printStackTrace();
-	        }
-	    }
-
-	}
-
+        String message = "j'accepte ta connexion";
+        try {
+            client.getOutputStream().write("test".getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+       try {
+           if (client.getInputStream().available() > 0) {
+               byte[] buffer;
+               buffer = new byte[client.getInputStream().available()];
+               client.getInputStream().read(buffer);
+               System.out.println(String.format(" Received: %s ", new String(buffer))+ nodeManager.getNode());
+               System.out.println("from : "+client.getRemoteSocketAddress()+" ------ "+client.getLocalSocketAddress()+"\n");
+           
+              
+               String msg=new String(buffer);
+               
+               if(!msg.equals("requestBlockchain"))
+               System.out.println(Transaction.receivejson(msg)+"\n");
+               
+           }
+           client.close();
+       } catch (IOException e) {
+           e.printStackTrace();
+       }
+    }
+}
