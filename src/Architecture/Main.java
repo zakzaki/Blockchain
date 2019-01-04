@@ -17,7 +17,7 @@ import p2p.Wallet;
 
 public class Main {
 
-	public static void main(String[] args) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, UnsupportedEncodingException, JsonProcessingException, SignatureException {
+	public static void main(String[] args) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, UnsupportedEncodingException, JsonProcessingException, SignatureException {	
 		
 		/*ArrayList<String> donne=new ArrayList<>();
 		String root="";
@@ -37,12 +37,15 @@ public class Main {
 		Wallet w1=new Wallet();
 		Wallet w2=new Wallet();
 		
-		Limits limits=new Limits("10", "500");
-		Date_p d=new Date_p("15/12/2018", "15/12/2018", "15/12/2018");
+		Limits limits=new Limits(10, 500);
+		Date_p d=new Date_p("14/12/2018", "16/12/2018", "15/12/2018");
 		Payload payload=new Payload("zak", "TEST TEST", d, "Marseille", limits);
+		Payload payload2=new Payload("zak22", "TEST TEST 2", d, "Paris", limits);
 		Serialiser serialiser=new Serialiser(w1.getPublicKey(), "CREATION", payload);
+		Serialiser serialiser2=new Serialiser(w2.getPublicKey(), "CREATION", payload2);
 		
-		Transaction t1=new Transaction("souscriptionHash_m", serialiser,w1.getPublicKey());
+		Transaction t1=new Transaction("T1", serialiser,w1.getPublicKey());
+		Transaction t2=new Transaction("T2", serialiser2,w2.getPublicKey());
 				
 			/*	String s="";		
 					
@@ -71,8 +74,8 @@ public class Main {
 		*/
 		
 	
-		Node n1 = new Node("127.0.0.1", 3004); 
-		Node n2 = new Node("127.0.0.1", 3005); 
+		Node n1 = new Node("127.0.0.1", 3005); 
+		Node n2 = new Node("127.0.0.1", 3006); 
 		
 		List<Node>peer1=new ArrayList<>();
 		//peer1.add(n2);
@@ -80,19 +83,27 @@ public class Main {
 		List<Node>peer2=new ArrayList<>();
 		peer2.add(n1);
 		
-		Block b=new Block("fff", "fgg");
-							
-		CommunicationNodeManager c1=new CommunicationNodeManager("C1 ", "127.0.0.1", 3004, w1, b, peer1);
-		CommunicationNodeManager c2=new CommunicationNodeManager("C2 ", "127.0.0.1", 3005, w2, b, peer2);
+		//Block b=new Block("fff", "fgg");
+		
+		ArrayList<Transaction>t=new ArrayList<>();
+		t.add(t1);
+		t.add(t2);
+		Block b=new Block(w1.getPublicKey(), t,"hhh");
+		
+		CommunicationNodeManager c1=new CommunicationNodeManager("C1 ", "127.0.0.1", 3005, w1, b, peer1);
+		CommunicationNodeManager c2=new CommunicationNodeManager("C2 ", "127.0.0.1", 3006, w2, b, peer2);
 			
 		
 		c1.startHost();	
 		//c2.getNode().addPeer(n1);
 		c2.startHost();
 			
+		String bbb=b.sendjson(w1.getPrivateKey());
+		System.out.println(bbb);
+		c1.broadcast(bbb, null);
 		//Transaction t = new Transaction(w1.getPublicKey(),"creation","1"); 		
 		//c1.broadcast(Message.MESSAGE_TYPE.READY, t1);
-		try {
+	/*	try {
 			String s=t1.sendjson(w1.getPrivateKey());
 			c1.broadcast(s,null);
 		//	String json=t1.receivejson(s);
@@ -101,8 +112,7 @@ public class Main {
 		} catch (JsonProcessingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-		
+		}*/
 		
 		
 		

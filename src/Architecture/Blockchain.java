@@ -27,7 +27,7 @@ public class Blockchain implements Serializable , Sendable {
             for (int i = 1; i <= blockChain.size()-1; i++) {
                 Block currentBlock = (Block) blockChain.get(i-1);
                 Block nextBlock = (Block) blockChain.get(i);
-                if (!(nextBlock.previousHash.equals(currentBlock.currentHash))) {
+                if (!(nextBlock.getSerialiser().getHash_prev_block().equals(currentBlock.currentHash))) {
                     return false;
                 }
             }
@@ -68,17 +68,6 @@ public class Blockchain implements Serializable , Sendable {
 
  
 
-    @Override
-    public String toString(){
-        String s="";
-        for(Block b : blockChain) {
-            s = s + ("{\nCurentHash="+b.currentHash+"");
-            s = s + ("PreviousHash="+b.previousHash+"");
-            s = s + b.toString();
-            s = s + ("TimeStamp="+b.getTimeStamp()+"\n}\n");
-        }
-        return s;
-    }
 
     public Block getLatestBlock() {
         if (size()==0) {
@@ -99,7 +88,7 @@ public class Blockchain implements Serializable , Sendable {
             else
                 return false;
         }
-        if (!Objects.equals(block.getPreviousHash(), latestBlock.getCurrentHash())) {
+        if (!Objects.equals(block.getSerialiser().getHash_prev_block(), latestBlock.getCurrentHash())) {
             System.out.println("Unmatched hash code");
             return false;
         }

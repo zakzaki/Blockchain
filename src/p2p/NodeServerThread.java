@@ -5,6 +5,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import Architecture.Block;
+import Architecture.Block_serialiser;
+import Architecture.Serialiser;
 import Architecture.Transaction;
 
 public class NodeServerThread extends Thread {
@@ -75,8 +80,32 @@ public class NodeServerThread extends Thread {
               
                String msg=new String(buffer);
                
-               if(!msg.equals("requestBlockchain"))
-               System.out.println(Transaction.receivejson(msg)+"\n");
+               if(!msg.equals("requestBlockchain")) {
+            	   try {
+            	   String s=Transaction.receivejson(msg);
+            	             	   
+            	   ObjectMapper objectMapper = new ObjectMapper();
+            	   Serialiser ser= objectMapper.readValue(s,Serialiser.class); 
+            	   
+            	   System.out.println(s+"\n");
+            	   
+            	 //  System.out.println(ser.getPayload().toString());
+            	   }catch(Exception e) {
+            		   
+            		   String s=Block.receivejson(msg);            		  
+                	   
+                	   ObjectMapper objectMapper = new ObjectMapper();
+                	   Block_serialiser ser= objectMapper.readValue(s,Block_serialiser.class); 
+                	    
+                	   System.out.println("/********************************/");
+                	   System.out.println(s+"\n");  
+                	   System.out.println("/********************************/");
+                	   
+                	  // System.out.println(ser.toString());
+            	   }
+            	   
+               }
+              
                
            }
            client.close();

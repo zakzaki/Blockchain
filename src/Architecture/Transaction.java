@@ -6,6 +6,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SignatureException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,6 +41,40 @@ public class Transaction implements Serializable, Sendable{
 	    	
 		}
 	    
+	    public boolean isValid() {
+	    		    	
+	    	if(this.getSerialiser().getPayload().getLimits().getMax() < this.getSerialiser().getPayload().getLimits().getMin()) 
+	    	{
+			System.out.println("la limite est fausse");
+			return false;
+	    	}
+	    	
+	        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+	        String cur_date = format.format(new java.util.Date());
+
+	        java.util.Date begin_date = null;
+	        java.util.Date end_date = null;
+	        java.util.Date end_souscription_date =  null;
+	        java.util.Date current_date =  null;
+
+	        try {
+	             begin_date = format.parse(this.serialiser.getPayload().getDate().getBegin());
+	             end_date = format.parse(this.serialiser.getPayload().getDate().getEnd());
+	             end_souscription_date = format.parse(this.serialiser.getPayload().getDate().getEnd_souscription());
+	             current_date = format.parse(cur_date);
+	        } catch (ParseException e) {
+	            e.printStackTrace();
+	        }
+	        if (begin_date.compareTo(end_date) <= 0 && current_date.compareTo(end_date) < 0
+	                && end_souscription_date.compareTo(begin_date) < 0 )
+	        {
+	            return true;
+	        }else{
+	        	System.out.println("la date est fausse");
+	            return false;
+	        }
+	    }
+	    
 	    public String signTransaction(PrivateKey privateKey) throws SignatureException, NoSuchAlgorithmException {
 	       
 			try {
@@ -52,6 +88,34 @@ public class Transaction implements Serializable, Sendable{
 	        return this.senderSignature;
 	    }
 	    
+	    public boolean verifiersignature(String s) throws NoSuchAlgorithmException, JsonProcessingException, SignatureException {
+	    	
+	    	String eventHash = null;
+	        if(serialiser.getType_transaction().equals("CREATION")){
+	          	          
+	        	String s1=receivejson(s);
+	        	
+	        	eventHash= HashUtil.hmac(s1, "0");	  
+	          
+	        }else if(serialiser.getType_transaction().equals("INSCRIPTION")){
+	            eventHash = getHash();
+	        }
+	        
+	        String signa=receivesignature(s);
+	        
+	        return HashUtil.verifyECDSASignature(eventHash.getBytes(), signa.getBytes(), pub_key);
+	        
+	    }
+	    
+	    public static String receivesignature(String s) {
+	    	
+	    	
+	    	String t=s.substring(0, 32);	    		    	
+	    	int taille=getTaille(t);
+	    	
+	    	String signature=s.substring(taille+32);
+	    	return signature;
+	    }
 	    
 	    
 	    public static String receivejson(String s) {
@@ -69,35 +133,8 @@ public class Transaction implements Serializable, Sendable{
 	    	}
 	    	json=converttostring(json);
 	    	return json;
-	    }
+	    }	      
 	    
-	    public static String receivesignature(String s) {
-	    	
-	    	String t=s.substring(0, 32);	    		    	
-	    	int taille=getTaille(t);
-	    	
-	    	String signature=s.substring(taille+32);
-	    	
-	    	return signature;
-	    }
-	    
-	    public boolean verifiersignature(String s) throws NoSuchAlgorithmException, JsonProcessingException, SignatureException {
-	    	
-	    	String eventHash = null;
-	        if(serialiser.getType_transaction().equals("CREATION")){
-	          	          
-	        	String s1=receivejson(s);
-	        	
-	        	eventHash= HashUtil.hmac(s1, "0");	  
-	          
-	        }else if(serialiser.getType_transaction().equals("INSCRIPTION")){
-	            eventHash = getHash();
-	        }
-	        
-	        
-	        return HashUtil.verifyECDSASignature(eventHash.getBytes(), senderSignature.getBytes(), pub_key);
-	        
-	    }
 	    
 	    public String sendjson(PrivateKey privateKey) throws UnsupportedEncodingException, JsonProcessingException, NoSuchAlgorithmException {
 	    	
@@ -111,17 +148,7 @@ public class Transaction implements Serializable, Sendable{
 			}
 	    	return taille+json_binary+senderSignature;
 	    }
-	    
-	    public static String taille(String s) {
-	    	
-	    	int taille=s.length();
-	    	String r=Integer.toBinaryString(taille);
-	    	if(r.length()<32) {
-	    		int bourrer=32-r.length();
-	    		for(int i=0;i<bourrer;i++) r="0"+r;
-	    	}
-	    	return r;
-	    }
+	    	    
 	    
 	    public String stringToBinary(String data) throws JsonProcessingException{
 
@@ -153,6 +180,18 @@ public class Transaction implements Serializable, Sendable{
 	    	
 	    	 return str;
 	    }
+	    
+	    public static String taille(String s) {
+	    	
+	    	int taille=s.length();
+	    	String r=Integer.toBinaryString(taille);
+	    	if(r.length()<32) {
+	    		int bourrer=32-r.length();
+	    		for(int i=0;i<bourrer;i++) r="0"+r;
+	    	}
+	    	return r;
+	    }
+	    
 	    
 	    public static int getTaille(String s) {
 	    	int t = Integer.parseInt(s, 2);

@@ -20,6 +20,7 @@ public class Payload implements Serializable, Sendable{
 		this.limits = limits;
 	}
 	
+	
 	public Payload(String event_hash) {
 		this.event_hash=event_hash;
 	}
@@ -66,6 +67,11 @@ public class Payload implements Serializable, Sendable{
 	public void setEvent_hash(String event_hash) {
 		this.event_hash = event_hash;
 	}
+	
+	/*public boolean isvalid() {
+		if(date.isvalid() && limits.isvalid()) return true;
+		return false;
+	}*/
 
 	
 }

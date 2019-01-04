@@ -3,8 +3,8 @@ package Architecture;
 import java.io.Serializable;
 import java.security.PublicKey;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
+
 
 public class Serialiser implements Serializable, Sendable {
 	
@@ -23,13 +23,34 @@ public class Serialiser implements Serializable, Sendable {
 	}
 	
 	
+	public Serialiser(String pub_key, String type_transaction, String name, String description, String begin, String end, String end_souscription, String location, int min, int max, String event_hash) {
+		
+		super();
+		this.pub_key = pub_key;
+		this.type_transaction = type_transaction;
+		
+		if(type_transaction.equals("CREATION")) {
+			Date_p d=new Date_p(begin, end, end_souscription);
+			Limits l=new Limits(min, max);
+			this.payload = new Payload(name, description, d, location, l);
+		}else {
+			this.payload=new Payload(event_hash);
+		}	
+		
+	}
+	
+	public Serialiser() {
+		
+	}
+	
+	
 
 	public String getPub_key() {
 		return pub_key;
 	}
 
-	public void setPub_key(PublicKey pub_key) {
-		this.pub_key = HashUtil.bytesToHex(pub_key.getEncoded());
+	public void setPub_key(String pub_key) {
+		this.pub_key = pub_key;
 	}
 
 	public String getType_transaction() {
