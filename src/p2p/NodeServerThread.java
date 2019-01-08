@@ -74,16 +74,26 @@ public class NodeServerThread extends Thread {
                byte[] buffer;
                buffer = new byte[client.getInputStream().available()];
                client.getInputStream().read(buffer);
-               System.out.println(String.format(" Received: %s ", new String(buffer))+ nodeManager.getNode());
+               System.out.println(" Reçu de la part de : "+ nodeManager.getNode());
                System.out.println("from : "+client.getRemoteSocketAddress()+" ------ "+client.getLocalSocketAddress()+"\n");
            
               
                String msg=new String(buffer);
                
                if(!msg.equals("requestBlockchain")) {
+            	   
+        		   System.out.println("/********************************/");
+        		   System.out.println(" MESSAGE RECU EN BINAIRE");
+        		   System.out.println(msg);
+            	   
             	   try {
-            	   String s=Transaction.receivejson(msg);
-            	             	   
+            	             	        
+        		   System.out.println("\n /********************************/");
+        		   System.out.println(" MESSAGE TRANSFORME EN CLAIR");
+        		   String s=Transaction.receivejson(msg);
+        		   System.out.println(s+"\n");          		   
+        		   System.out.println("/********************************/");
+            	   
             	   ObjectMapper objectMapper = new ObjectMapper();
             	   Serialiser ser= objectMapper.readValue(s,Serialiser.class); 
             	   
@@ -92,16 +102,17 @@ public class NodeServerThread extends Thread {
             	 //  System.out.println(ser.getPayload().toString());
             	   }catch(Exception e) {
             		   
-            		   String s=Block.receivejson(msg);            		  
+            		   
+            		   System.out.println("\n /********************************/");
+            		   System.out.println(" MESSAGE TRANSFORME EN CLAIR");
+            		   String s=Block.receivejson(msg);
+            		   System.out.println(s+"\n");          		   
+            		   System.out.println("/********************************/");
+            		               		  
                 	   
                 	   ObjectMapper objectMapper = new ObjectMapper();
                 	   Block_serialiser ser= objectMapper.readValue(s,Block_serialiser.class); 
-                	    
-                	   System.out.println("/********************************/");
-                	   System.out.println(s+"\n");  
-                	   System.out.println("/********************************/");
-                	   
-                	  // System.out.println(ser.toString());
+                	                   	 
             	   }
             	   
                }

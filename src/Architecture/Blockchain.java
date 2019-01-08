@@ -77,6 +77,24 @@ public class Blockchain implements Serializable , Sendable {
     }
 
 
+    public boolean checkLevel(Block b) {
+    	
+    	if(b.getSerialiser().getLevel()==0) return true;
+    	
+    	boolean bool=this.getBlocks().contains(b);
+    	
+    	if(bool) {
+    		int pos=this.getBlocks().indexOf(b);
+    		if(this.getBlocks().get(pos-1).getSerialiser().getLevel()+1==b.getSerialiser().getLevel()) {
+    			return true;
+    		}
+    		return false;
+    	}else {
+    		System.out.println("Ce block n'existe pas dans la chaine");
+    	}
+    	
+    	return bool;
+    }
 
     private boolean isBlockValid(final Block block) {
         final Block latestBlock = getLatestBlock();

@@ -17,7 +17,7 @@ public class Serialiser implements Serializable, Sendable {
 	public Serialiser(PublicKey pub_key, String type_transaction, Payload payload) {
 	
 		super();
-		this.pub_key = HashUtil.bytesToHex(pub_key.getEncoded()) ;
+		this.pub_key = HashUtil.getPublicKeyAsHex(pub_key) ;
 		this.type_transaction = type_transaction;
 		this.payload = payload;
 	}

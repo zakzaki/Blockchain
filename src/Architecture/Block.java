@@ -1,4 +1,5 @@
 package Architecture;
+import java.io.IOException;
 import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -6,7 +7,9 @@ import java.security.PublicKey;
 import java.security.SignatureException;
 import java.util.ArrayList;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.UnsupportedEncodingException;
@@ -16,14 +19,9 @@ public class Block implements Serializable , Sendable{
 
 	
 	public String currentHash;
-  //  public String previousHash;
     private ArrayList<Transaction> transactions = new ArrayList<>();
-  //  private String root_hash;
     private PublicKey pub_key;
     private String creatorSignature;
-  //  private int level;
-  //  private long time;   
-  //  private int nonce;
     
     private Block_serialiser serialiser=new Block_serialiser();
     
@@ -50,8 +48,7 @@ public class Block implements Serializable , Sendable{
     }
     
 
-
-    public Block(PublicKey pub_key, ArrayList<Transaction> transactions, String previousHash) {
+    public Block(PublicKey pub_key, ArrayList<Transaction> transactions, String previousHash) throws NoSuchAlgorithmException, JsonProcessingException {
 
         this.transactions = transactions;
         this.serialiser.setRoot_hash(arbre_merkel.arbre(transactions));
@@ -59,8 +56,25 @@ public class Block implements Serializable , Sendable{
         this.pub_key = pub_key;
         this.currentHash = this.calculateHash();
         
+        this.serialiser.setPub_key(HashUtil.bytesToHex(pub_key.getEncoded()));
         this.serialiser.setTransactions(getTransactionJson());
     }
+    
+    public Block() {
+	
+	}
+
+	public static Block creer(String msg) throws JsonParseException, JsonMappingException, IOException {
+    	String s=receivejson(msg);
+    	
+    	Block b=new Block();
+    	ObjectMapper objectMapper = new ObjectMapper();
+    	Block_serialiser ser= objectMapper.readValue(s,Block_serialiser.class); 
+ 	    b.setSerialiser(ser);
+ 	    b.setPub_key(HashUtil.createPublicEncryptionKey(ser.getPub_key()));
+    	return b;
+    }
+	
     
     public String transform() throws JsonProcessingException {
     	
@@ -89,11 +103,12 @@ public class Block implements Serializable , Sendable{
         return creatorSignature;
     }
     
-    public boolean verifierSignature(String s) throws SignatureException, NoSuchAlgorithmException {
+    public boolean verifierSignature() throws SignatureException, NoSuchAlgorithmException, JsonProcessingException {
        
         if(this.getCreatorSignature() != null){
 
-            String currentHash = HashUtil.hmac(receivejson(s), "0");
+          //  String currentHash = HashUtil.hmac(receivejson(s), "0");
+        	String currentHash = HashUtil.hmac(transform(), "0");
 			this.currentHash = currentHash;
 			
             if(HashUtil.verifyECDSASignature(this.currentHash.getBytes(), this.getCreatorSignature().getBytes(), this.getPub_key())){
@@ -117,7 +132,8 @@ public class Block implements Serializable , Sendable{
     	String t=s.substring(0, 32);	    		    	
     	int taille=getTaille(t);
     	
-    	String signature=s.substring(taille+32);
+    	String signature_binaire=s.substring(taille+32);
+    	String signature=converttostring(signature_binaire);
     	return signature;
     }
     
@@ -131,8 +147,9 @@ public class Block implements Serializable , Sendable{
 		} catch (SignatureException e) {
 			e.printStackTrace();
 		}
+    	String signature_binaire=stringToBinary(creatorSignature);
     	
-    	return taille+json_binary+creatorSignature;
+    	return taille+json_binary+signature_binaire;
     }
     
     
@@ -219,6 +236,8 @@ public class Block implements Serializable , Sendable{
 
 	public void setPub_key(PublicKey pub_key) {
 		this.pub_key = pub_key;
+		this.serialiser.setPub_key(HashUtil.bytesToHex(pub_key.getEncoded()));
+		
 	}
 
 
@@ -259,8 +278,11 @@ public class Block implements Serializable , Sendable{
 	}
 
 	//Calculer le Haché du bloc
-    public String calculateHash() {
-        return HashUtil.applySha256( serialiser.getHash_prev_block() + transactions + pub_key);
+    public String calculateHash() throws NoSuchAlgorithmException, JsonProcessingException {
+      //  return HashUtil.applySha256( serialiser.getHash_prev_block() + transactions + pub_key);
+        
+        String calculatedhash= HashUtil.hmac(this.transform(), "0");
+        return calculatedhash;
 
     }
     
@@ -285,4 +307,21 @@ public class Block implements Serializable , Sendable{
         if (currentHash != null ? !currentHash.equals(block.currentHash) : block.currentHash != null) return false;
         return creatorSignature != null ? creatorSignature.equals(block.creatorSignature) : block.creatorSignature == null;
     }
+    
+    
+    
+    public void mineBlock(int d) throws NoSuchAlgorithmException, JsonProcessingException {
+        
+        String t= new String(new char[d]).replace('\0', '0');
+        if( this.currentHash == null)
+        {
+            this.currentHash = calculateHash();
+        }
+        while(!new String(this.currentHash).substring( 0, d).equals(t)) {
+            this.serialiser.setNonce(this.serialiser.getNonce()+1);
+            this.currentHash = calculateHash();            
+        }
+        System.out.println("  Block miné avec succès, le nonce = " + this.serialiser.getNonce() );
+    }
+    
 }

@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.PublicKey;
 import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +20,9 @@ public class Main {
 
 	public static void main(String[] args) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, UnsupportedEncodingException, JsonProcessingException, SignatureException {	
 		
-		/*ArrayList<String> donne=new ArrayList<>();
+		/*
+		      ARBRE DE MERKLE EXEMPLE  
+		ArrayList<String> donne=new ArrayList<>();
 		String root="";
 		donne.add("transaction 1");
 		donne.add("transaction 2");
@@ -44,38 +47,17 @@ public class Main {
 		Serialiser serialiser=new Serialiser(w1.getPublicKey(), "CREATION", payload);
 		Serialiser serialiser2=new Serialiser(w2.getPublicKey(), "CREATION", payload2);
 		
+	//	Wallet k = new Wallet("myWallet.ser");
+	
 		Transaction t1=new Transaction("T1", serialiser,w1.getPublicKey());
-		Transaction t2=new Transaction("T2", serialiser2,w2.getPublicKey());
+		Transaction t2=new Transaction("T2", serialiser2,w2.getPublicKey());		
 				
-			/*	String s="";		
-					
-					try {
-						s=t1.stringToBinary();
-					} catch (JsonProcessingException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				
-					System.out.println(s);;
-					System.out.println(t1.converttostring(s)); */
-	
+		t1.signTransaction(w1.getPrivateKey());
+		t2.signTransaction(w2.getPrivateKey());
+							
 		
-	/*	ArrayList<Transaction>transactions=new ArrayList<>();
-		transactions.add(t1);
-		
-		System.out.println("ARBRE TRANSACTION  "+arbre_merkel.arbre(transactions));
-		
-		Block b=new Block(w.getPublicKey(), transactions, "2");
-		b.sign(w.getPrivateKey());
-		
-		System.out.println("CLE PUBLIQUE "+w.getPublicKey().toString()+" CLE PRIVE "+w.getPrivateKey().toString());		
-		System.out.println("LE BLOC");
-		System.out.println("current hash "+b.getCurrentHash()+"\n ROOT "+b.getRoot()+"\n SIGN "+b.getCreatorSignature());
-		*/
-		
-	
-		Node n1 = new Node("127.0.0.1", 3005); 
-		Node n2 = new Node("127.0.0.1", 3006); 
+		Node n1 = new Node("127.0.0.1", 3003); 
+		Node n2 = new Node("127.0.0.1", 3004); 
 		
 		List<Node>peer1=new ArrayList<>();
 		//peer1.add(n2);
@@ -83,15 +65,13 @@ public class Main {
 		List<Node>peer2=new ArrayList<>();
 		peer2.add(n1);
 		
-		//Block b=new Block("fff", "fgg");
-		
 		ArrayList<Transaction>t=new ArrayList<>();
 		t.add(t1);
 		t.add(t2);
-		Block b=new Block(w1.getPublicKey(), t,"hhh");
+		Block b=new Block(w1.getPublicKey(), t,"test");
 		
-		CommunicationNodeManager c1=new CommunicationNodeManager("C1 ", "127.0.0.1", 3005, w1, b, peer1);
-		CommunicationNodeManager c2=new CommunicationNodeManager("C2 ", "127.0.0.1", 3006, w2, b, peer2);
+		CommunicationNodeManager c1=new CommunicationNodeManager("C1 ", "127.0.0.1", 3003, w1, b, peer1);
+		CommunicationNodeManager c2=new CommunicationNodeManager("C2 ", "127.0.0.1", 3004, w2, b, peer2);
 			
 		
 		c1.startHost();	
@@ -99,24 +79,22 @@ public class Main {
 		c2.startHost();
 			
 		String bbb=b.sendjson(w1.getPrivateKey());
-		System.out.println(bbb);
+		
+		
 		c1.broadcast(bbb, null);
-		//Transaction t = new Transaction(w1.getPublicKey(),"creation","1"); 		
-		//c1.broadcast(Message.MESSAGE_TYPE.READY, t1);
-	/*	try {
+			
+		try {
 			String s=t1.sendjson(w1.getPrivateKey());
 			c1.broadcast(s,null);
 		//	String json=t1.receivejson(s);
 			
-			System.out.println(t1.verifiersignature(s));
+			System.out.println(t1.verifiersignature());
 		} catch (JsonProcessingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}*/
+		}
 		
-		
-		
-		//Blockchain blockchain=new Blockchain();
+		b.mineBlock(4); // on mine un block avec une difficulté de 4 pour aller plus vite
 		
 		
 

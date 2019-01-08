@@ -1,4 +1,5 @@
 package Architecture;
+import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
@@ -9,7 +10,9 @@ import java.security.SignatureException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Transaction implements Serializable, Sendable{
@@ -31,6 +34,18 @@ public class Transaction implements Serializable, Sendable{
 		this.serialiser = serialiser;
 		this.pub_key=pub_key;
 	}
+	    
+	    public static Transaction creer(String msg) throws JsonParseException, JsonMappingException, IOException {
+	    	
+	    	String s=receivejson(msg);
+	    	
+	    	Transaction t=new Transaction();
+	    	ObjectMapper objectMapper = new ObjectMapper();
+     	   Serialiser ser= objectMapper.readValue(s,Serialiser.class); 
+     	   t.setSerialiser(ser);
+     	   t.setPub_key(HashUtil.createPublicEncryptionKey(ser.getPub_key()));
+	    	return t;
+	    }
 	    
 	    
 	    public String transform() throws JsonProcessingException {
@@ -80,28 +95,23 @@ public class Transaction implements Serializable, Sendable{
 			try {
 				String s =transform();
 				s=HashUtil.hmac(s, "0");
+				
 				this.senderSignature =  HashUtil.signECDSA(s.getBytes(), privateKey);
 			} catch (JsonProcessingException e) {
 				e.printStackTrace();
-			}		 
-			
+			}		 			
 	        return this.senderSignature;
 	    }
 	    
-	    public boolean verifiersignature(String s) throws NoSuchAlgorithmException, JsonProcessingException, SignatureException {
+	    public boolean verifiersignature() throws NoSuchAlgorithmException, JsonProcessingException, SignatureException {
 	    	
 	    	String eventHash = null;
-	        if(serialiser.getType_transaction().equals("CREATION")){
-	          	          
-	        	String s1=receivejson(s);
-	        	
-	        	eventHash= HashUtil.hmac(s1, "0");	  
-	          
-	        }else if(serialiser.getType_transaction().equals("INSCRIPTION")){
-	            eventHash = getHash();
-	        }
+	
+	    	String s1=transform();        	
+        	eventHash= HashUtil.hmac(s1, "0");	 
 	        
-	        String signa=receivesignature(s);
+	        //String signa=receivesignature(s);
+	        String signa=senderSignature;
 	        
 	        return HashUtil.verifyECDSASignature(eventHash.getBytes(), signa.getBytes(), pub_key);
 	        
@@ -113,7 +123,8 @@ public class Transaction implements Serializable, Sendable{
 	    	String t=s.substring(0, 32);	    		    	
 	    	int taille=getTaille(t);
 	    	
-	    	String signature=s.substring(taille+32);
+	    	String signature_binaire=s.substring(taille+32);
+	    	String signature=converttostring(signature_binaire);
 	    	return signature;
 	    }
 	    
@@ -146,7 +157,9 @@ public class Transaction implements Serializable, Sendable{
 			} catch (SignatureException e) {
 				e.printStackTrace();
 			}
-	    	return taille+json_binary+senderSignature;
+	    	
+	    	String signature_binaire=stringToBinary(senderSignature);
+	    	return taille+json_binary+signature_binaire;
 	    }
 	    	    
 	    
