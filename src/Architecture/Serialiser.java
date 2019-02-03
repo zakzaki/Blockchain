@@ -9,7 +9,7 @@ import java.security.PublicKey;
 public class Serialiser implements Serializable, Sendable {
 	
 	 	private String  pub_key;
-		private String type_transaction; //creation, REGISTER
+		private String type_transaction;
 		private Payload payload;
 		
 	

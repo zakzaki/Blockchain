@@ -4,8 +4,12 @@ import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.security.*;
 import java.security.interfaces.ECPrivateKey;
@@ -23,9 +27,7 @@ public class Wallet implements Serializable{
 
 
     /******************************************* Constructor **********************************************************/
-    /**
-     * Constructor withour arguments
-     */
+   
     public Wallet(){
         KeyPair pair = generateECDSAKeyPair();
 
@@ -33,16 +35,13 @@ public class Wallet implements Serializable{
         this.publicKey = pair.getPublic();
     }
 
-    /**
-     *
-     * @param path
-     */
+  
     public Wallet(String path){
 
         Wallet serializedWallet =null;
         try {
             ObjectInputStream in = new ObjectInputStream(new FileInputStream(path));
-            if(in==null) System.out.println("LLLLLLLLLLLLL");
+          
             serializedWallet = (Wallet) in.readObject();
             in.close();
 
@@ -51,6 +50,7 @@ public class Wallet implements Serializable{
         privateKey = (ECPrivateKey) serializedWallet.getPrivateKey();
         publicKey = (ECPublicKey) serializedWallet.getPublicKey();
     }
+    
 
     /********************************************* Getters and setters ************************************************/
     public PrivateKey getPrivateKey() {
@@ -80,10 +80,7 @@ public class Wallet implements Serializable{
 
     /****************************************** Other methods *********************************************************/
 
-    /**
-     *
-     * @return
-     */
+    
     public KeyPair generateRSAKeyPair() {
         try {
             KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
@@ -95,14 +92,10 @@ public class Wallet implements Serializable{
         }
     }
 
-    /**
-     *
-     * @return
-     */
     public KeyPair generateECDSAKeyPair(){
 
         KeyPair pair = null;
-        ECNamedCurveParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec("secp256k1");
+        ECNamedCurveParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec("secp256r1");
         KeyPairGenerator g = null;
         try {
             g = KeyPairGenerator.getInstance("ECDSA", new BouncyCastleProvider());

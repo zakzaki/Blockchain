@@ -2,7 +2,7 @@ package Architecture;
 
 public class Consensus {
 
-	public static boolean verifierTransaction(Transaction t) {	
+	public static boolean verifierTransaction(Transaction t, Blockchain blockchain) {	
 			
 		boolean b=false;
 		
@@ -15,7 +15,8 @@ public class Consensus {
 					if(t.isValid()) b=true;
 					return b;
 				}else if(t.getSerialiser().getType_transaction().equals("INSCRIPTION")) {
-					b=true;
+					
+					if(exist_transaction(t, blockchain)) b=true;
 				}
 			}
 			
@@ -26,33 +27,58 @@ public class Consensus {
 		return b;
 	}
 	
+	public static boolean exist_transaction(Transaction t, Blockchain b) {
+		
+		boolean bool=false;
+		int i=0;
+		
+		while(!bool && b.getBlocks().size()>i) {
+					
+			int j=0;
+			
+			while( !bool && b.getBlock(i).getTransactions().size()>j ) {
+				
+				Transaction t1=b.getBlock(i).getTransactions().get(j);
+				String hash1 = HashUtil.applySha256(t1.toString());
+				
+				String hash2= HashUtil.applySha256(t.toString());
+				
+				if(hash1.equals(hash2)) return true;
+				
+				j++;
+			}
+			
+			i++;
+		}
+		
+		return bool;
+	}
 	
-	public static boolean verifierBlock(Block block, Blockchain blockchain, String root) {
+	public static boolean verifierBlock(Block block, Blockchain blockchain) {
 		
 		boolean b=false;
 		
 		try {
 			 if(block.verifierSignature() && verifierHashPrecedent(block, blockchain) && blockchain.checkLevel(block)
-	                     && verifierBlockTime(block) && verifierTransacDunBloc(block))    b = true;
+	                     && verifierBlockTime(block) && verifierTransacDunBloc(block,blockchain))    b = true;
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
 		return b;
 	}
 	
-	 public static boolean verifierTransacDunBloc(Block block){
+	 public static boolean verifierTransacDunBloc(Block block, Blockchain blockchain){
 	        if(block.isGenesis()){
 	            return true;
 	        }else{
-	            boolean valid = false;
+	            boolean b = true;
 	            int i = 0;
-	            while (!valid && i<block.getTransactions().size()){
-	                if(!verifierTransaction(block.getTransactions().get(i))){
-	                    valid = true;
-	                }
+	            while (b && i<block.getTransactions().size()){
+	                if(!verifierTransaction(block.getTransactions().get(i),blockchain))   b = false;
+	                
 	                i++;
 	            }
-	            return !valid;
+	            return b;
 	        }
 
 	    }
@@ -67,23 +93,13 @@ public class Consensus {
         }
     }
 	
-	 /*  public static Boolean verifierLevelPrecedent(Block block, Blockchain blockchain){
-
-	        if(block.getSerialiser().getLevel() == blockchain.getLatestBlock().getSerialiser().getLevel()+1 ){
-	            return true;
-	        }else{
-	            System.out.println("Pervious level is not valid");
-	            return false;
-	        }
-
-	    }*/
 	   
 	   public static Boolean verifierBlockTime(Block block)
 	    {
 	        if(block.getSerialiser().getTime() < System.currentTimeMillis() + 2){
 	            return true;
 	        }else{
-	            System.out.println("block time is not valid ");
+	            System.out.println("Time du block n'est pas valide ");
 	            return false;
 	        }
 	    }

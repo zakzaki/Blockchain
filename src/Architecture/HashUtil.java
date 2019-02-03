@@ -1,5 +1,4 @@
 package Architecture;
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
@@ -55,28 +54,21 @@ public class HashUtil {
         return result.toString();
     }
  	
- 	static String hmac(String input ,String secret ) throws NoSuchAlgorithmException {
- 		
- 		
+ 	static String hmac(byte[] input ,byte[] secret ) throws NoSuchAlgorithmException {
+ 				
  		Mac sha256_HMAC = null;
- 	    String result = input;
- 	    String key =  secret;
- 		
+ 	    String result=null;		
  		
  		try{
- 	        byte [] byteKey = key.getBytes("UTF-8");
+ 	        byte [] byteKey = secret;
  	        final String HMAC_SHA256 = "HmacSHA256";
  	        sha256_HMAC = Mac.getInstance(HMAC_SHA256);      
  	        SecretKeySpec keySpec = new SecretKeySpec(byteKey, HMAC_SHA256);
  	        sha256_HMAC.init(keySpec);
  	        byte [] mac_data = sha256_HMAC.
- 	         doFinal(input.getBytes("UTF-8"));
- 	        //result = Base64.encode(mac_data);
- 	        result = bytesToHex(mac_data);
- 	       // System.out.println(result);
- 	    } catch (UnsupportedEncodingException e) {
- 	        // TODO Auto-generated catch block
- 	        e.printStackTrace();
+ 	         doFinal(input);
+ 	        //byte[] r = Base64.encode(mac_data);  	       
+ 	        result = bytesToHex(mac_data); 	     
  	    } catch (NoSuchAlgorithmException e) {
  	        // TODO Auto-generated catch block
  	        e.printStackTrace();
@@ -90,7 +82,7 @@ public class HashUtil {
  	}
  	
  	
- 	 public static String signECDSA(byte[] data, PrivateKey privateKey) throws SignatureException {
+ 	 public static byte[] signECDSA(byte[] data, PrivateKey privateKey) throws SignatureException {
 
          Signature ecdsaSign = null;
          byte[] signature = null;
@@ -105,11 +97,11 @@ public class HashUtil {
              e.printStackTrace();
          }
 
-         return new String(signature);
+         return signature;
 
      }
  	 
- 	public static  boolean verifyECDSASignature(byte[] data, byte[] signature, PublicKey publicKey) throws SignatureException {
+ 	public static  boolean verifierSignature(byte[] data, byte[] signature, PublicKey publicKey) throws SignatureException {
 
  		 boolean result = false;
          Signature ecdsaVerify = null;
@@ -156,7 +148,7 @@ public class HashUtil {
         try {
             Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
             java.security.spec.ECPoint w = new java.security.spec.ECPoint(x, y);
-            ECNamedCurveParameterSpec params = ECNamedCurveTable.getParameterSpec("secp256k1");
+            ECNamedCurveParameterSpec params = ECNamedCurveTable.getParameterSpec("secp256r1");
             KeyFactory fact = KeyFactory.getInstance("ECDSA", "BC");
             ECCurve curve = params.getCurve();
             java.security.spec.EllipticCurve ellipticCurve = EC5Util.convertCurve(curve, params.getSeed());
@@ -175,6 +167,29 @@ public class HashUtil {
             e.printStackTrace();
             return null;
         }
+    }
+    
+    
+    public static byte[] concatenate(byte[] hash1, byte[] hash2) {
+        if(hash2 != null){
+            byte[] newHash = new byte[hash1.length + hash2.length];
+            System.arraycopy(hash1, 0, newHash, 0, hash1.length);
+            System.arraycopy(hash2, 0, newHash, hash1.length, hash2.length);
+            return newHash;
+        }else{
+            return  hash1;
+        }
+    }
+    
+    public static byte[] hexStringToByteArray(String s) {
+    	
+        byte[] b = new byte[s.length() / 2];
+        for (int i = 0; i < b.length; i++) {
+            int index = i * 2;
+            int v = Integer.parseInt(s.substring(index, index + 2), 16);
+            b[i] = (byte) v;           
+        }       
+        return b;
     }
 
 

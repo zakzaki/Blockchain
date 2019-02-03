@@ -9,7 +9,6 @@ import java.util.Objects;
 public class Blockchain implements Serializable , Sendable {
 
     private List<Block> blockChain;
-    private int validatorsNumber;
 
 
     public Blockchain(){
@@ -39,7 +38,6 @@ public class Blockchain implements Serializable , Sendable {
     public void addBlock(Block b) {
         if (isBlockValid(b)) 
             blockChain.add(b);
-       // else System.out.println("Le bloc n'est pas valide, on ne peut pas ajouter un bloc");
     }
 
     //Retourner la liste de tous les blocs de la Blockchain
@@ -97,7 +95,9 @@ public class Blockchain implements Serializable , Sendable {
     }
 
     private boolean isBlockValid(final Block block) {
-        final Block latestBlock = getLatestBlock();
+    	
+    	return Consensus.verifierBlock(block, this);
+      /*  final Block latestBlock = getLatestBlock();
 
         if (latestBlock == null) {
 
@@ -111,14 +111,7 @@ public class Blockchain implements Serializable , Sendable {
             return false;
         }
 
-        return true;
+        return true;*/
     }
 
-    public String getStringResume() {
-        return String.valueOf(blockChain.size()) + " blocks ";
-    }
-
-    public int getValidatorsNumber() {
-        return validatorsNumber;
-    }
 }

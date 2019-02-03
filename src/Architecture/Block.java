@@ -21,7 +21,7 @@ public class Block implements Serializable , Sendable{
 	public String currentHash;
     private ArrayList<Transaction> transactions = new ArrayList<>();
     private PublicKey pub_key;
-    private String creatorSignature;
+    private byte[] creatorSignature;
     
     private Block_serialiser serialiser=new Block_serialiser();
     
@@ -31,8 +31,8 @@ public class Block implements Serializable , Sendable{
             
             this.serialiser.setLevel(0);
             this.serialiser.setTime((System.currentTimeMillis()/1000)); 
-            this.serialiser.setHash_prev_block(HashUtil.hmac("genesis", "0"));
-			this.currentHash = HashUtil.hmac("genesis", "0") ;
+            this.serialiser.setHash_prev_block(HashUtil.applySha256("genesis"));
+			this.currentHash = HashUtil.applySha256("genesis") ;
         }
     }
     
@@ -96,11 +96,11 @@ public class Block implements Serializable , Sendable{
     public String signBlock(PrivateKey key) throws JsonProcessingException, SignatureException, NoSuchAlgorithmException{
             
         String s =transform();
-		s=HashUtil.hmac(s, "0");
+		s=HashUtil.applySha256(s);
 		this.currentHash=s;
 		this.creatorSignature =  HashUtil.signECDSA(s.getBytes(), key);
         
-        return creatorSignature;
+        return new String (creatorSignature);
     }
     
     public boolean verifierSignature() throws SignatureException, NoSuchAlgorithmException, JsonProcessingException {
@@ -108,10 +108,10 @@ public class Block implements Serializable , Sendable{
         if(this.getCreatorSignature() != null){
 
           //  String currentHash = HashUtil.hmac(receivejson(s), "0");
-        	String currentHash = HashUtil.hmac(transform(), "0");
+        	String currentHash = HashUtil.applySha256(transform());
 			this.currentHash = currentHash;
 			
-            if(HashUtil.verifyECDSASignature(this.currentHash.getBytes(), this.getCreatorSignature().getBytes(), this.getPub_key())){
+            if(HashUtil.verifierSignature(this.currentHash.getBytes(), this.getCreatorSignature(), this.getPub_key())){
                 return true;
             }
             else{
@@ -147,7 +147,7 @@ public class Block implements Serializable , Sendable{
 		} catch (SignatureException e) {
 			e.printStackTrace();
 		}
-    	String signature_binaire=stringToBinary(creatorSignature);
+    	String signature_binaire=stringToBinary( new String(creatorSignature));
     	
     	return taille+json_binary+signature_binaire;
     }
@@ -241,12 +241,12 @@ public class Block implements Serializable , Sendable{
 	}
 
 
-	public String getCreatorSignature() {
+	public byte[] getCreatorSignature() {
 		return creatorSignature;
 	}
 
 
-	public void setCreatorSignature(String creatorSignature) {
+	public void setCreatorSignature(byte[] creatorSignature) {
 		this.creatorSignature = creatorSignature;
 	}
 
@@ -281,7 +281,7 @@ public class Block implements Serializable , Sendable{
     public String calculateHash() throws NoSuchAlgorithmException, JsonProcessingException {
       //  return HashUtil.applySha256( serialiser.getHash_prev_block() + transactions + pub_key);
         
-        String calculatedhash= HashUtil.hmac(this.transform(), "0");
+        String calculatedhash= HashUtil.applySha256(this.transform());
         return calculatedhash;
 
     }

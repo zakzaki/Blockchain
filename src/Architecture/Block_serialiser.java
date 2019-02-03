@@ -13,21 +13,21 @@ public class Block_serialiser {
 	private int nonce;
 	
 	
-	public Block_serialiser(String pub_key, String hash_prev_block, String root_hash, int level, long time,
+	public Block_serialiser(String pub_key, String hash_prev_block, String root_hash, int level,
 			ArrayList<Serialiser> transactions, int nonce) {
 		super();
 		this.pub_key = pub_key;
 		this.hash_prev_block = hash_prev_block;
 		this.root_hash = root_hash;
 		this.level = level;
-		this.time = time;
+		this.time = (System.currentTimeMillis()/1000);
 		this.transactions = transactions;
 		this.nonce = nonce;
 	}
 	
 	
 	public Block_serialiser() {
-		
+		this.time = (System.currentTimeMillis()/1000);
 	}
 	
 	

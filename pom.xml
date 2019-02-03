@@ -3,7 +3,6 @@
   <groupId>Blockchain</groupId>
   <artifactId>Blockchain</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <name>blockchain</name>
   <build>
     <sourceDirectory>src</sourceDirectory>
     <plugins>
@@ -18,7 +17,7 @@
     </plugins>
   </build>
   
-   <dependencies>
+     <dependencies>
    
   <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk16 -->
 <dependency>
@@ -40,7 +39,24 @@
     <version>2.9.7</version>
 </dependency>
 
+   <!-- https://mvnrepository.com/artifact/javax.json/javax.json-api -->
+<dependency>
+    <groupId>javax.json</groupId>
+    <artifactId>javax.json-api</artifactId>
+    <version>1.1.4</version>
+</dependency>
 
+<dependency>
+    <groupId>org.glassfish</groupId>
+    <artifactId>javax.json</artifactId>
+    <version>1.1</version>
+</dependency>
+
+<dependency>
+	<groupId>commons-io</groupId>
+	<artifactId>commons-io</artifactId>
+	<version>2.5</version>
+</dependency>
    
 </dependencies>
   

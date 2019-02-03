@@ -17,8 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Transaction implements Serializable, Sendable{
 
-	 private String senderSignature;
-	 private String souscriptionHash;
+	 private byte[] senderSignature;
 	 private Serialiser serialiser;
 	 private String hash;
 	 private PublicKey pub_key;
@@ -27,14 +26,14 @@ public class Transaction implements Serializable, Sendable{
 		 
 	 }
 	 
-	    public Transaction( String souscriptionHash, Serialiser serialiser, PublicKey pub_key) {
+	    public Transaction( Serialiser serialiser, PublicKey pub_key) {
 		
 	    	super();
-		this.souscriptionHash = souscriptionHash;
 		this.serialiser = serialiser;
 		this.pub_key=pub_key;
 	}
 	    
+	    //permet de créer une transaction à partir d'un string reçu dans le réseau
 	    public static Transaction creer(String msg) throws JsonParseException, JsonMappingException, IOException {
 	    	
 	    	String s=receivejson(msg);
@@ -94,13 +93,13 @@ public class Transaction implements Serializable, Sendable{
 	       
 			try {
 				String s =transform();
-				s=HashUtil.hmac(s, "0");
+				this.hash=HashUtil.applySha256(s);
 				
-				this.senderSignature =  HashUtil.signECDSA(s.getBytes(), privateKey);
+				this.senderSignature =  HashUtil.signECDSA(hash.getBytes(), privateKey);
 			} catch (JsonProcessingException e) {
 				e.printStackTrace();
 			}		 			
-	        return this.senderSignature;
+	        return new String(this.senderSignature);
 	    }
 	    
 	    public boolean verifiersignature() throws NoSuchAlgorithmException, JsonProcessingException, SignatureException {
@@ -108,18 +107,14 @@ public class Transaction implements Serializable, Sendable{
 	    	String eventHash = null;
 	
 	    	String s1=transform();        	
-        	eventHash= HashUtil.hmac(s1, "0");	 
+        	eventHash= HashUtil.applySha256(s1);	       	        
 	        
-	        //String signa=receivesignature(s);
-	        String signa=senderSignature;
-	        
-	        return HashUtil.verifyECDSASignature(eventHash.getBytes(), signa.getBytes(), pub_key);
+	        return HashUtil.verifierSignature(eventHash.getBytes(), senderSignature, pub_key);
 	        
 	    }
 	    
 	    public static String receivesignature(String s) {
-	    	
-	    	
+	    		    	
 	    	String t=s.substring(0, 32);	    		    	
 	    	int taille=getTaille(t);
 	    	
@@ -156,9 +151,8 @@ public class Transaction implements Serializable, Sendable{
 				signTransaction(privateKey);
 			} catch (SignatureException e) {
 				e.printStackTrace();
-			}
-	    	
-	    	String signature_binaire=stringToBinary(senderSignature);
+			}	    	
+	    	String signature_binaire=stringToBinary(new String(senderSignature));
 	    	return taille+json_binary+signature_binaire;
 	    }
 	    	    
@@ -227,11 +221,11 @@ public class Transaction implements Serializable, Sendable{
 			this.hash = hash;
 		}
 		
-		public String getSenderSignature() {
+		public byte[] getSenderSignature() {
 	        return senderSignature;
 	    }
 
-	    public void setSenderSignature(String senderSignature) {
+	    public void setSenderSignature(byte[] senderSignature) {
 	        this.senderSignature = senderSignature;
 	    }
 	    
