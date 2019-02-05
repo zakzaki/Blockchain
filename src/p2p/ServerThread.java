@@ -35,7 +35,7 @@ public class ServerThread extends Thread{
 			
 			serverThreadThreads.forEach(t->t.getPrintWriter().println(msg));
 		}catch(Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 	}
 

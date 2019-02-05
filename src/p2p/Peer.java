@@ -5,8 +5,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
 import java.util.Scanner;
 
+import Architecture.Block;
+import Architecture.Blockchain;
 import Architecture.Date_p;
 import Architecture.Limits;
 import Architecture.Payload;
@@ -16,7 +19,7 @@ import Architecture.Transaction;
 public class Peer {
 	
 
-	public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
+	public static void main(String[] args) throws IOException, NoSuchAlgorithmException, SignatureException {
 				
 		System.out.println("entrer username ");
 		Scanner sc = new Scanner(System.in);		
@@ -40,11 +43,34 @@ public class Peer {
 		
 		Transaction t1=new Transaction( serialiser,k.getPublicKey());
 		
+		
+		String s1=t1.sendjson(k.getPrivateKey());
+		System.out.println("Validation de la transaction T1: "+t1.verifiersignature());
 		/****************************************/
-		String s=t1.sendjson(k.getPrivateKey());;
 		
 		
-		new Peer().updateListenToPeer(b,usern, serverThread, s);
+		
+		Payload payload2=new Payload("zak22", "TEST TEST 2", d, "Paris", limits);
+		Serialiser serialiser2=new Serialiser(k.getPublicKey(), "CREATION", payload2);
+		
+		Transaction t2=new Transaction( serialiser2,k.getPublicKey());	
+		
+		String s2=t1.sendjson(k.getPrivateKey());
+		
+		
+		Block block_g=new Block(true);
+		Block block= new Block();
+		
+		block.addTransaction(t1);
+		block.addTransaction(t2);
+		
+		Blockchain blockchain = new Blockchain();
+		blockchain.addBlock(block_g);
+		blockchain.addBlock(block);
+		
+		
+		
+		new Peer().updateListenToPeer(b,usern, serverThread, s1);
 
 	}
 	

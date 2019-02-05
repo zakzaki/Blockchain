@@ -43,6 +43,10 @@ public class PeerThread extends Thread{
  		   System.out.println(s+"\n");          		   
  		   System.out.println("********************************");
  		   
+ 		   Transaction tk=Transaction.creer(msg);
+ 		   
+ 		   tk.verifiersignature();
+ 		   
 		   }catch(Exception e) {
     		   
     		   String s=Block.receivejson(msg);

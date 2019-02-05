@@ -72,6 +72,16 @@ public class Block implements Serializable , Sendable{
     	Block_serialiser ser= objectMapper.readValue(s,Block_serialiser.class); 
  	    b.setSerialiser(ser);
  	    b.setPub_key(HashUtil.createPublicEncryptionKey(ser.getPub_key()));
+ 	    
+ 	   for(int i=0;i<ser.getTransactions().size();i++) {
+ 		   
+ 		   Transaction t= new Transaction();
+ 		   t.setSerialiser(ser.getTransactions().get(i));
+ 		  t.setPub_key(HashUtil.createPublicEncryptionKey(ser.getTransactions().get(i).getPub_key()));
+ 		   
+ 		   b.getTransactions().set(i, t);
+ 	   }
+ 	    
     	return b;
     }
 	

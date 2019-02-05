@@ -16,7 +16,7 @@ public class Consensus {
 					return b;
 				}else if(t.getSerialiser().getType_transaction().equals("INSCRIPTION")) {
 					
-					if(exist_transaction(t, blockchain)) b=true;
+					if(exist_transaction(t.getSerialiser().getPayload().getEvent_hash(), blockchain)) b=true;
 				}
 			}
 			
@@ -27,7 +27,7 @@ public class Consensus {
 		return b;
 	}
 	
-	public static boolean exist_transaction(Transaction t, Blockchain b) {
+	public static boolean exist_transaction(String t, Blockchain b) {
 		
 		boolean bool=false;
 		int i=0;
@@ -41,9 +41,7 @@ public class Consensus {
 				Transaction t1=b.getBlock(i).getTransactions().get(j);
 				String hash1 = HashUtil.applySha256(t1.toString());
 				
-				String hash2= HashUtil.applySha256(t.toString());
-				
-				if(hash1.equals(hash2)) return true;
+				if(hash1.equals(t)) return true;
 				
 				j++;
 			}

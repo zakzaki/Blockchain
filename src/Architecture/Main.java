@@ -47,6 +47,9 @@ public class Main {
 
 	public static void main(String[] args) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, SignatureException, IOException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException {	
 		
+		byte [] d0=read("data");
+		
+		System.out.println(HashUtil.bytesToHex(d0));
 		
 	/*			
 		     // ARBRE DE MERKLE EXEMPLE  
@@ -85,7 +88,7 @@ public class Main {
 		donne.add(new String (d14));
 	    System.out.println(arbre_merkel.arbre2(donne));	  */ 	    
 		
-		Wallet w1=new Wallet();
+	/*	Wallet w1=new Wallet();
 		Wallet w2=new Wallet();
 		Wallet k = new Wallet("myWallet.ser");
 		
@@ -111,8 +114,7 @@ public class Main {
 		
 		
 		b.mineBlock(4); // on mine un block avec une difficulté de 4 pour aller plus vite
-		
-		
+		*/
 
 	}
 
